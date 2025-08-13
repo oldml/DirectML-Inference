@@ -147,7 +147,6 @@
     <ClInclude Include="..\src\cap.h" />
     <ClInclude Include="..\src\dmlModule.h" />
     <ClInclude Include="..\src\nms.h" />
-    <ClInclude Include="..\ai\move.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,21 +1,28 @@
-﻿#include "dml-module.h"
+﻿#include "dmlModule.h"
 #include "cap.h"
 #include "nms.h"
 #include <opencv2/opencv.hpp>
+#include <iostream>
 #define SHOWCV2 1
 #define CONFIDENCE 0.4f
 #define NMS_THRESHOLD 0.5f
 
-int main()
+int main(int argc, char* argv[])
 {
-	timeBeginPeriod(1);
+    if (argc != 2) {
+        std::cerr << "Usage: " << argv[0] << " <window_title>" << std::endl;
+        return -1;
+    }
 
-	const char* module_path = "1.onnx";
-	auto* frame = new IDML();
-	frame->AnalyticalModel(module_path);
-	int imgsize = frame->imgsize;
+    const char* window_title = argv[1];
+    timeBeginPeriod(1);
 
-	capture c(1920, 1080, imgsize, imgsize, "CrossFire");
+    const char* module_path = "example.onnx";
+    auto* frame = new IDML();
+    frame->AnalyticalModel(module_path);
+    int imgsize = frame->imgsize;
+
+    capture c(1920, 1080, imgsize, imgsize, window_title);
 
 	while (true)
 	{
