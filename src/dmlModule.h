@@ -4,70 +4,108 @@
 #include <dml/cpu_provider_factory.h>
 #include <vector>
 #include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <algorithm>
+#include <string>
+#include <memory>
 
-
-class IDML
-{
+/**
+ * @brief DirectML推理类
+ */
+class IDML {
 public:
-	//  --------------------------- ����API --------------------------- // IStates
+    /**
+     * @brief 构造函数
+     */
+    IDML();
 
-	//! ����ģ��
-	bool AnalyticalModel(const char* onnx_path);
+    /**
+     * @brief 析构函数
+     */
+    ~IDML();
 
-	//! ����ģ��
-	bool AnalyticalModel(const std::string onnx_path);
+    /**
+     * @brief 解析模型文件
+     * @param onnx_path ONNX模型文件路径
+     * @return 是否成功
+     */
+    bool AnalyticalModel(const char* onnx_path);
 
+    /**
+     * @brief 解析模型文件
+     * @param onnx_path ONNX模型文件路径
+     * @return 是否成功
+     */
+    bool AnalyticalModel(const std::string& onnx_path);
 
-	float* Detect(BYTE* img);
+    /**
+     * @brief 执行目标检测
+     * @param img 输入图像数据
+     * @return 检测结果
+     */
+    float* Detect(BYTE* img);
 
-	//! �ͷ�����
-	void Release();
-
-	
+    /**
+     * @brief 释放资源
+     */
+    void Release();
 
 private:
+    size_t input_tensor_size;                           //! 输入数据大小
+    std::unique_ptr<float[]> floatarr;                  //! 输出数据数组
+    OrtEnv* m_env;                                      //! ONNX运行环境
+    OrtSessionOptions* m_session_options;              //! 会话配置
+    OrtSession* m_session;                             //! 会话对象
+    OrtMemoryInfo* m_memory_info;                      //! 内存信息
+    OrtAllocator* m_allocator;                         //! 分配器
+    OrtValue* m_input_tensor;                          //! 输入tensor
+    OrtValue* m_output_tensor;                         //! 输出tensor
+    const OrtApi* m_ort_api;                           //! ONNX Runtime API
 
-	size_t input_tensor_size = 1;						//! �������ݴ�С
-	float* floatarr = nullptr;
-	OrtEnv* m_env = nullptr;
-	OrtSessionOptions* m_session_options = nullptr;
-	OrtSession* m_session = nullptr;
-	OrtMemoryInfo* m_memory_info = nullptr;
-	OrtAllocator* m_allocator = nullptr;
-	OrtValue* m_input_tensors = nullptr;		// ����tensor
-	OrtValue* m_output_tensors = nullptr;		// ���tensor
-	const OrtApi* _ort = OrtGetApiBase()->GetApi(ORT_API_VERSION);	// api
+    // 模型输入输出信息
+    std::vector<int64_t> m_input_dims;                 //! 输入维度
+    std::vector<int64_t> m_output_dims;                //! 输出维度
+    const char* m_input_name;                          //! 输入名称
+    const char* m_output_name;                         //! 输出名称
 
+    // 图像处理相关
+    std::unique_ptr<float[]> blob;                     //! 图像数据缓冲区
+    int total_pixels_count;                            //! 总像素数
+    const float f1;                                    //! 归一化系数 (1/255.0)
 
-	// Function
-	bool CheckStatus(OrtStatus* status, int line);
-	bool parseInput();
-	bool parseOutput();
-	bool parseModelInfo();
-	bool InitInterface(const wchar_t* onn_path);
+    /**
+     * @brief 检查ONNX Runtime状态
+     * @param status 状态对象
+     * @param line 行号
+     * @return 是否成功
+     */
+    bool CheckStatus(OrtStatus* status, int line);
 
-	const char* input_name[1] = { "images" };
-	const char* output_name[1] = { "output" };
+    /**
+     * @brief 解析输入信息
+     * @return 是否成功
+     */
+    bool parseInput();
 
-	std::vector<int64_t> m_input_dims = {};
-	std::vector<int64_t> m_output_dims = {};
+    /**
+     * @brief 解析输出信息
+     * @return 是否成功
+     */
+    bool parseOutput();
 
-	float* blob;
-	int total_pixels_count ;
-	float f1 = 1.f / 255.0f;
-	
+    /**
+     * @brief 解析模型信息
+     * @return 是否成功
+     */
+    bool parseModelInfo();
+
+    /**
+     * @brief 初始化接口
+     * @param onnx_path ONNX模型文件路径
+     * @return 是否成功
+     */
+    bool InitInterface(const wchar_t* onnx_path);
+
 public:
-
-	int out1 = 0;
-	int out2 = 0;
-	int imgsize = 0;
+    int out1;                                          //! 输出维度1
+    int out2;                                          //! 输出维度2
+    int imgsize;                                       //! 图像尺寸
 };
-
-
-
-
-
-
